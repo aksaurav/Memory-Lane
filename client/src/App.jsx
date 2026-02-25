@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react"; // Added useState import
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import CameraView from "./components/CameraView";
+import AddPerson from "./pages/AddPerson";
+import Auth from "./pages/Auth"; // Added Auth import
+import { useFaceDetection } from "./hooks/useFaceDetection";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [authenticated, setAuthenticated] = useState(
+    !!localStorage.getItem("token"),
+  );
 
+  const { isModelsLoaded } = useFaceDetection();
+
+  // If not logged in, show the Auth page
+  if (!authenticated) return <Auth setAuthenticated={setAuthenticated} />;
+
+  // Once authenticated, show the app
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Router>
+      <nav className="p-4 bg-gray-100 flex gap-4">
+        <Link to="/" className="font-bold underline">
+          Identify
+        </Link>
+        <Link to="/add" className="font-bold underline">
+          Add Person
+        </Link>
+      </nav>
 
-export default App
+      <main className="p-4">
+        <Routes>
+          <Route
+            path="/"
+            element={<CameraView isModelsLoaded={isModelsLoaded} />}
+          />
+          <Route path="/add" element={<AddPerson />} />
+        </Routes>
+      </main>
+    </Router>
+  );
+};
+
+export default App;
